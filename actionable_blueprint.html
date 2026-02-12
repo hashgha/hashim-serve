@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serve - The Ultimate Development Blueprint</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+        :root {
+            --navy: #0f172a;
+            --slate: #334155;
+            --slate-light: #475569;
+            --gold: #ca8a04;
+            --gold-light: #facc15;
+            --light: #f1f5f9;
+            --text-color: #cbd5e1;
+            --green: #22c55e;
+            --red: #ef4444;
+        }
+
+        @font-face {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            src: local('Segoe UI'), local('Tahoma'), local('Geneva'), local('Verdana'), sans-serif;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            background-color: var(--navy);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: #0d1424;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--slate);
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            text-align: center;
+        }
+
+        .sidebar-header .logo {
+            max-width: 140px;
+            margin: 10px 0;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 14px 25px;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+            border-right: 4px solid transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background-color: var(--navy);
+            color: var(--light);
+            border-right-color: var(--gold);
+        }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--slate-light);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .page-header h2 { font-size: 32px; color: var(--light); margin-bottom: 5px; }
+        .page-header p { font-size: 16px; color: var(--text-color); margin-top: 0; margin-bottom: 30px; }
+
+        .card { background-color: var(--slate); border-radius: 8px; padding: 25px; margin-bottom: 25px; border: 1px solid var(--slate-light); }
+        .card-header { color: var(--light); font-size: 20px; margin: 0 0 20px 0; border-bottom: 1px solid var(--slate-light); padding-bottom: 15px; }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .stat-card { background-color: var(--slate-light); padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-card .value { font-size: 36px; font-weight: bold; color: var(--gold-light); }
+        .stat-card .label { font-size: 14px; color: var(--text-color); }
+        
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: right; border-bottom: 1px solid var(--slate-light); white-space: normal; }
+        .data-table th { background-color: var(--slate-light); color: var(--light); font-weight: bold; }
+        .data-table-wrapper { overflow-x: auto; }
+
+        .badge { padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .badge.success { background-color: #166534; color: #d1fae5; }
+        .badge.danger { background-color: #991b1b; color: #fecaca; }
+
+        .pillar-card { margin-bottom: 30px; }
+        .pillar-card .pillar-objective { font-size: 18px; font-weight: bold; color: var(--gold-light); margin-bottom: 15px; }
+        .pillar-card ul { list-style: none; padding: 0; }
+        .pillar-card ul li { padding: 8px 0; border-bottom: 1px solid var(--slate-light); }
+        .pillar-card ul li:last-child { border: none; }
+
+        .team-member-card { background-color: var(--slate-light); padding: 20px; border-radius: 8px; }
+        .team-member-card h4 { margin: 0 0 10px 0; font-size: 18px; color: var(--light); }
+        .team-member-card .salary { font-size: 14px; color: var(--gold-light); margin-bottom: 15px; }
+        .team-member-card .tasks-title { font-weight: bold; margin-top: 15px; text-align: right; }
+        .team-member-card ul { font-size: 13px; text-align: right; padding-right: 15px; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; flex-direction: row; overflow-x: auto; }
+            .sidebar-header, .sidebar-footer { display: none; }
+            .sidebar-nav { display: flex; flex-direction: row; }
+            .sidebar-nav a { border-right: none; border-bottom: 4px solid transparent; }
+            .sidebar-nav a:hover, .sidebar-nav a.active { border-bottom-color: var(--gold); }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="serve_brand_assets/serve_wordmark_white.png" alt="Serve Logo" class="logo" />
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li><a href="#baseline" class="nav-link active">الوضع الحالي المفصل</a></li>
+                <li><a href="#targets" class="nav-link">الأهداف الاستراتيجية</a></li>
+                <li><a href="#pillars" class="nav-link">المحاور الاستراتيجية</a></li>
+                <li><a href="#transformation" class="nav-link">مقارنة التحول</a></li>
+                <li><a href="#org-chart" class="nav-link">خطة الفريق والتوظيف</a></li>
+                <li><a href="#kpi-matrix" class="nav-link">مصفوفة المؤشرات الكاملة</a></li>
+                 <li><a href="#roadmap" class="nav-link">خارطة الطريق</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">&copy; 2026 - Blueprint v3.0</div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div id="baseline" class="page active">
+            <header class="page-header">
+                <h2>الوضع الحالي المفصل (As-Is)</h2>
+                <p>تحليل كامل للأرقام والعمليات والبنية التحتية الحالية لشركة "سيرف".</p>
+            </header>
+            <div class="card">
+                <h3 class="card-header">الأرقام الحقيقية</h3>
+                <div class="grid-container">
+                    <div class="stat-card"><div class="value">22,425</div><div class="label">عميل نشط</div></div>
+                    <div class="stat-card"><div class="value">400</div><div class="label">مزود خدمة</div></div>
+                    <div class="stat-card"><div class="value">14,000</div><div class="label">طلب مُنشأ</div></div>
+                    <div class="stat-card"><div class="value">36%</div><div class="label">نسبة الإتمام</div></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-header">تحليل الوضع الحالي</h3>
+                <div class="grid-container" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <h4>العملاء والطلبات</h4>
+                        <p>قاعدة عملاء نشطين قوية جداً لمنصة في هذه المرحلة. حجم الطلبات المُنشأة (14 ألف) يؤكد وجود طلب حقيقي في السوق (Product-Market Fit)، لكن الفجوة مع الطلبات المكتملة (5 آلاف) تكشف عن تحدٍ كبير في السيولة التشغيلية.</p>
+                    </div>
+                    <div>
+                        <h4>الجودة والرضا</h4>
+                        <p>رضا العملاء بنسبة 98% بعد التنفيذ هو مؤشر ممتاز وذو قيمة عالية. هذا يثبت أن المشكلة ليست في جودة الخدمة نفسها، بل في العمليات التي تسبق التنفيذ: تفعيل المزودين، كفاءة إسناد الطلبات، وتجربة المستخدم أثناء تتبع الطلب.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                <h3 class="card-header">نموذج العمل والبنية التقنية الحالية</h3>
+                 <div class="grid-container" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <h4>نموذج العمل الحالي</h4>
+                        <ul>
+                            <li><strong>مصدر الدخل:</strong> يعتمد بشكل أساسي على عمولة (Take Rate) من كل طلب منفذ.</li>
+                            <li><strong>الاشتراكات:</strong> لا يوجد نموذج اشتراكات مفعل بشكل كامل سواء للعملاء أو المزودين.</li>
+                             <li><strong>القنوات:</strong> iOS, Android, موقع ويب، واتساب.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>البنية التقنية الحالية</h4>
+                        <ul>
+                            <li><strong>التطبيقات:</strong> مبنية باستخدام React Native (كود مشترك).</li>
+                            <li><strong>التكامل:</strong> متكاملة مع بوابات دفع محلية.</li>
+                            <li><strong>التحكم:</strong> وجود لوحة تحكم داخلية أساسية لمتابعة الطلبات.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="targets" class="page">
+            <header class="page-header">
+                <h2>الأهداف الاستراتيجية (3 سنوات)</h2>
+                <p>الأهداف الرقمية المفصلة لنمو الشركة في جميع الجوانب.</p>
+            </header>
+            <div class="card">
+                <h3 class="card-header">أهداف نمو العملاء والطلبات</h3>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>المؤشر</th><th>السنة 0 (الحالي)</th><th>السنة 1</th><th>السنة 2</th><th>السنة 3</th></tr></thead>
+                    <tbody>
+                        <tr><td>العملاء النشطين</td><td>22,425</td><td>~26,900</td><td>~33,600</td><td>~42,000</td></tr>
+                        <tr><td>الطلبات المكتملة سنوياً</td><td>5,000</td><td>6,500</td><td>8,800</td><td>+12,000</td></tr>
+                        <tr><td>الطلب لكل عميل/سنة</td><td>0.22</td><td>-</td><td>-</td><td>≥ 0.5</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-header">أهداف نمو مزودي الخدمة</h3>
+                 <p>التركيز على تغيير تركيبة الموردين لزيادة حصة الفئات الملتزمة (Pro/Elite) لتصل إلى 70% من الطلبات.</p>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>الفئة</th><th>اليوم (تقديري)</th><th>الهدف بعد 3 سنوات</th></tr></thead>
+                    <tbody>
+                        <tr><td>Starter</td><td>250</td><td>250–280</td></tr>
+                        <tr><td>Pro</td><td>110</td><td>220–260</td></tr>
+                        <tr><td>Elite</td><td>40</td><td>120–150</td></tr>
+                        <tr><td><strong>المجموع</strong></td><td><strong>400</strong></td><td><strong>~700</strong></td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-header">الأهداف المالية (GMV & Take Rate)</h3>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                     <thead><tr><th>المؤشر</th><th>السنة 0 (الحالي)</th><th>السنة 1</th><th>السنة 2</th><th>السنة 3</th></tr></thead>
+                     <tbody>
+                        <tr><td>إجمالي GMV المتوقع</td><td>1م ريال</td><td>1.3م ريال</td><td>1.76م ريال</td><td>+2.4م ريال</td></tr>
+                        <tr><td>نسبة العمولة (Take Rate)</td><td>~12%</td><td>12-14%</td><td>-</td><td>15-18%</td></tr>
+                     </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="pillars" class="page">
+             <header class="page-header">
+                <h2>المحاور الاستراتيجية الخمسة</h2>
+                <p>الركائز الأساسية التي ستقود عملية التحول والنمو.</p>
+            </header>
+            <div class="grid-container" style="grid-template-columns: 1fr 1fr;">
+                <div class="card pillar-card">
+                    <h3 class="card-header">1. تفعيل العملاء وزيادة الطلب</h3>
+                    <p class="pillar-objective">🎯 رفع الطلبات المكتملة إلى +12,000 سنوياً وزيادة معدل الطلب إلى 0.5 لكل عميل.</p>
+                    <h4>الخطوات:</h4>
+                    <ul>
+                        <li>إطلاق اشتراكات الأفراد "راحة البيت" (ضمان ممتد, كاش باك, أولوية).</li>
+                        <li>تفعيل برنامج ولاء ونقاط ومكافآت إحالة.</li>
+                        <li>تحسين تجربة الطلب لتصبح في 3 خطوات مع تتبع واضح للحالة.</li>
+                    </ul>
+                </div>
+                 <div class="card pillar-card">
+                    <h3 class="card-header">2. تعزيز العرض وجودة التنفيذ</h3>
+                    <p class="pillar-objective">🎯 رفع نسبة إتمام الطلبات إلى 80% وزيادة حصة Pro/Elite إلى 70%.</p>
+                    <h4>الخطوات:</h4>
+                    <ul>
+                        <li>تثبيت نموذج باقات الموردين (Starter, Pro, Elite) رسمياً.</li>
+                        <li>تطبيق نظام تصنيف (ذهبي/فضي/برونزي) مبني على الأداء.</li>
+                        <li>إطلاق "أكاديمية سيرف" لتدريب الفنيين على الجودة وخدمة العملاء.</li>
+                    </ul>
+                </div>
+                 <div class="card pillar-card">
+                    <h3 class="card-header">3. نموذج الإيرادات والربحية</h3>
+                    <p class="pillar-objective">🎯 بناء نموذج دخل متنوع ورفع Take Rate إلى 15-18%.</p>
+                    <h4>الخطوات:</h4>
+                    <ul>
+                        <li>تثبيت هيكل عمولات مرن حسب الباقة ونوع الخدمة.</li>
+                        <li>تعظيم الإيرادات من اشتراكات العملاء والموردين.</li>
+                        <li>تفعيل خدمات ذات قيمة مضافة (Top Rank, تقارير متقدمة).</li>
+                    </ul>
+                </div>
+                <div class="card pillar-card">
+                    <h3 class="card-header">4. المنتج والتقنية</h3>
+                    <p class="pillar-objective">🎯 تحسين تجربة الاستخدام ورفع الكفاءة التشغيلية.</p>
+                    <h4>الخطوات:</h4>
+                    <ul>
+                        <li>تطوير شامل لتطبيق العميل ولوحة تحكم مزود الخدمة.</li>
+                        <li>بناء محرك مطابقة ذكي (AI Dispatching) وبوابة B2B.</li>
+                        <li>إضافة التتبع الحي وتجهيز البنية لمتجر قطع الغيار.</li>
+                    </ul>
+                </div>
+                 <div class="card pillar-card">
+                    <h3 class="card-header">5. الثقة والجودة</h3>
+                    <p class="pillar-objective">🎯 الحفاظ على رضا عملاء ≥95% مع التوسع في حجم الطلبات.</p>
+                    <h4>الخطوات:</h4>
+                    <ul>
+                        <li>إطلاق "ضمان سيرف" الموحد (Serve Warranty).</li>
+                        <li>تفعيل نظام تحقق وشارة "موثوق" للمزودين المتميزين.</li>
+                        <li>تطبيق سياسة واضحة للنزاعات والاسترداد مرتبطة بتصنيف المزود.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="transformation" class="page">
+            <header class="page-header">
+                <h2>مقارنة التحول: الآن مقابل المستقبل</h2>
+                <p>جداول تفصيلية توضح الفروقات الاستراتيجية بين الوضع الحالي والرؤية المستقبلية.</p>
+            </header>
+            <div class="card">
+                <h3 class="card-header">جدول: العملاء والطلب (Demand)</h3>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>البند</th><th>سيرف الآن</th><th>سيرف بعد التطوير</th></tr></thead>
+                    <tbody>
+                        <tr><td>تعريف العميل</td><td>عميل يطلب خدمة عند الحاجة (On-demand)</td><td>عميل مشترك ذو علاقة مستمرة</td></tr>
+                        <tr><td>نمط الاستخدام</td><td>طلبات "مرة واحدة"</td><td>مزيج من طلبات فورية، مجدولة، وضمن اشتراك</td></tr>
+                        <tr><td>برامج الولاء</td><td>غير منظمة</td><td>برنامج نقاط وإحالات فعال</td></tr>
+                        <tr><td>الهدف من العميل</td><td>تلبية طلبه الحالي</td><td>بناء علاقة طويلة الأمد وزيادة قيمته (LTV)</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+             <div class="card">
+                <h3 class="card-header">جدول: مزودو الخدمة (Supply)</h3>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>البند</th><th>سيرف الآن</th><th>سيرف بعد التطوير</th></tr></thead>
+                    <tbody>
+                        <tr><td>هيكلة الموردين</td><td>تحت مستوى واحد عملياً</td><td>تقسيم رسمي: Starter / Pro / Elite</td></tr>
+                        <tr><td>التصنيف</td><td>غير موجود</td><td>نظام (ذهبي/فضي/برونزي) مبني على الأداء</td></tr>
+                        <tr><td>التدريب</td><td>لا يوجد إطار رسمي</td><td>"أكاديمية سيرف" لتطوير المهارات</td></tr>
+                        <tr><td>العلاقة</td><td>وسيط يوفر عملاء</td><td>شراكة طويلة المدى (توفير أدوات، تدريب، فرص)</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+             <div class="card">
+                <h3 class="card-header">جدول: المنتج والتقنية</h3>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>البند</th><th>سيرف الآن</th><th>سيرف بعد التطوير</th></tr></thead>
+                    <tbody>
+                        <tr><td>محرك المطابقة</td><td>إسناد شبه يدوي أو بمنطق بسيط</td><td>محرك مطابقة ذكي (AI)</td></tr>
+                        <tr><td>لوحة المزود</td><td>عرض وتحديث حالة الطلبات</td><td>لوحة متقدمة (أرباح، إحصائيات، تقويم، إدارة فريق)</td></tr>
+                        <tr><td>التتبع</td><td>متوفر جزئياً</td><td>تتبع حي على الخريطة شبيه بأوبر</td></tr>
+                        <tr><td>B2B</td><td>غير موجود</td><td>بوابة مخصصة للشركات لإدارة العقارات</td></tr>
+                    </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+
+        <div id="org-chart" class="page">
+            <header class="page-header">
+                <h2>خطة الفريق والتوظيف المفصلة</h2>
+                <p>الهيكل التنظيمي المقترح، مهام كل دور، الرواتب التقديرية، وجدول التوظيف.</p>
+            </header>
+            <div class="card">
+                <h3 class="card-header">المرحلة 1: الفريق الأساسي (12 شهر الأولى) - الراتب الشهري الإجمالي: ~45,000 ريال</h3>
+                <div class="grid-container">
+                    <div class="team-member-card">
+                        <h4>مدير تشغيل</h4>
+                        <p class="salary">الراتب: 13,000 - 16,000 ريال</p>
+                        <p class="tasks-title">المهام:</p>
+                        <ul><li>رفع نسبة إتمام الطلبات</li><li>إدارة علاقات الموردين</li><li>تصميم العمليات اليومية</li></ul>
+                    </div>
+                    <div class="team-member-card">
+                        <h4>مدير تطوير أعمال (B2B)</h4>
+                        <p class="salary">الراتب: 11,000 - 14,000 ريال</p>
+                         <p class="tasks-title">المهام:</p>
+                        <ul><li>إغلاق عقود مع الشركات والمجمعات</li><li>تصميم عروض الاشتراكات التجارية</li><li>بناء شراكات استراتيجية</li></ul>
+                    </div>
+                     <div class="team-member-card">
+                        <h4>أخصائي تسويق ونمو</h4>
+                        <p class="salary">الراتب: 5,000 - 7,000 ريال</p>
+                         <p class="tasks-title">المهام:</p>
+                        <ul><li>إدارة الحملات المدفوعة</li><li>تحسين قمع التحويل (Funnel)</li><li>مسؤول عن تكلفة اكتساب العميل (CAC)</li></ul>
+                    </div>
+                    <div class="team-member-card">
+                        <h4>محاسب / مسؤول مالي</h4>
+                        <p class="salary">الراتب: 5,000 - 7,000 ريال</p>
+                         <p class="tasks-title">المهام:</p>
+                        <ul><li>إعداد التقارير المالية الشهرية</li><li>متابعة العمولات والاشتراكات</li><li>قياس Take Rate والهامش الربحي</li></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-header">المرحلة 2: تعزيز النمو والتقنية (بعد 9-18 شهرًا)</h3>
+                <div class="grid-container">
+                     <div class="team-member-card">
+                        <h4>قائد تقني / مهندس برمجيات أول</h4>
+                        <p class="salary">الراتب: 14,000 - 16,000 ريال</p>
+                        <p><strong>المهام:</strong> قيادة تطوير المنتج، بناء محرك المطابقة الذكي، ومراقبة الأداء التقني.</p>
+                    </div>
+                    <div class="team-member-card">
+                        <h4>مندوب مبيعات ميداني (B2B)</h4>
+                        <p class="salary">الراتب: 4,500 - 6,000 ريال + عمولة</p>
+                        <p><strong>المهام:</strong> زيارة العملاء التجاريين المحتملين وشرح عروض الاشتراك لدعم مدير تطوير الأعمال.</p>
+                    </div>
+                    <div class="team-member-card">
+                        <h4>أخصائي خدمة عملاء إضافي</h4>
+                        <p class="salary">الراتب: 4,500 - 6,000 ريال</p>
+                        <p><strong>المهام:</strong> مواكبة النمو في حجم الطلبات والاتصالات لضمان الحفاظ على جودة الدعم.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="kpi-matrix" class="page">
+            <header class="page-header">
+                <h2>مصفوفة مؤشرات الأداء الرئيسية الكاملة</h2>
+                <p>المقاييس التفصيلية لتتبع نجاح الاستراتيجية، مع تحديد الأهداف والمسؤوليات ومصادر البيانات لكل مؤشر.</p>
+            </header>
+            <div class="card">
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>المؤشر (KPI)</th>
+                            <th>التعريف</th>
+                            <th>الهدف</th>
+                            <th>المسؤول</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>عدد الطلبات المكتملة شهريًا</td><td>مجموع الطلبات التي تصل لحالة "مكتمل".</td><td>+1,000/شهرياً (سنة 1)</td><td>أخصائي النمو</td></tr>
+                        <tr><td>معدل الطلب المتكرر</td><td>نسبة العملاء الذين أجروا طلبين أو أكثر.</td><td>≥ 40%</td><td>أخصائي النمو</td></tr>
+                        <tr><td>تكلفة اكتساب العميل (CAC)</td><td>تكلفة التسويق والمبيعات ÷ عدد العملاء الجدد.</td><td>LTV ≥ 3xCAC</td><td>أخصائي النمو</td></tr>
+                        <tr><td>نسبة إتمام الطلبات</td><td>الطلبات المكتملة ÷ الطلبات المنشأة.</td><td>75-80%</td><td>مدير التشغيل</td></tr>
+                        <tr><td>وقت قبول الطلب</td><td>متوسط الزمن من إنشاء الطلب حتى قبوله.</td><td>≤ 5 دقائق</td><td>مدير التشغيل</td></tr>
+                        <tr><td>نسبة الطلبات عبر Pro/Elite</td><td>حصّة الطلبات من الموردين المميزين.</td><td>≥ 70%</td><td>مدير التشغيل</td></tr>
+                        <tr><td>رضا العملاء (CSAT)</td><td>متوسط تقييم العميل بعد إغلاق الطلب.</td><td>≥ 95%</td><td>خدمة العملاء</td></tr>
+                        <tr><td>إجمالي قيمة الطلبات (GMV)</td><td>مجموع قيمة كل الطلبات المكتملة.</td><td>+2.4م ريال سنوياً</td><td>الرئيس التنفيذي</td></tr>
+                        <tr><td>Take Rate</td><td>صافي إيراد سيرف ÷ GMV.</td><td>15-18%</td><td>المسؤول المالي</td></tr>
+                        <tr><td>MRR من الاشتراكات</td><td>الإيراد الشهري المتكرر من الاشتراكات.</td><td>25-35% من الإيراد</td><td>مدير تطوير الأعمال</td></tr>
+                        <tr><td>Crash Rate (التطبيق)</td><td>نسبة الجلسات التي يحدث فيها انهيار للتطبيق.</td><td>&lt; 1%</td><td>القائد التقني</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        
+         <div id="roadmap" class="page">
+            <header class="page-header">
+                <h2>خارطة الطريق</h2>
+                <p>المعالم الرئيسية لرحلة التحول خلال السنوات الثلاث القادمة.</p>
+            </header>
+            <div class="card">
+                <div class="grid-container" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="roadmap-year">
+                        <h3>2025: التأسيس والتحسين</h3>
+                        <ul>
+                            <li>إعادة تصميم الهوية وتجربة المستخدم</li>
+                            <li>إطلاق باقات مزودي الخدمة (Starter, Pro)</li>
+                            <li>تحسين محرك المطابقة الأولي لرفع الإتمام إلى 50%</li>
+                        </ul>
+                    </div>
+                     <div class="roadmap-year">
+                        <h3>2026: التوسع وتحقيق الدخل</h3>
+                        <ul>
+                            <li>إطلاق اشتراكات الأفراد "راحة البيت"</li>
+                            <li>إطلاق باقة (Elite) وبوابة B2B</li>
+                            <li>التوسع الجغرافي (جدة والدمام)</li>
+                        </ul>
+                    </div>
+                     <div class="roadmap-year">
+                        <h3>2027: الذكاء والمنصة المتكاملة</h3>
+                         <ul>
+                            <li>تفعيل محرك مطابقة ذكي (AI Dispatching)</li>
+                            <li>إطلاق متجر قطع الغيار (Marketplace)</li>
+                            <li>تكامل إنترنت الأشياء (IoT) للصيانة الاستباقية</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+
+            function showPage(hash) {
+                const targetId = (hash && document.querySelector(hash)) ? hash.substring(1) : 'baseline';
+                
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + targetId) {
+                        link.classList.add('active');
+                    }
+                });
+                document.querySelector('.main-content').scrollTop = 0;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetHash = this.getAttribute('href');
+                    if(history.pushState) {
+                        history.pushState(null, null, targetHash);
+                    } else {
+                        location.hash = targetHash;
+                    }
+                    showPage(targetHash);
+                });
+            });
+
+            window.addEventListener('popstate', () => showPage(location.hash));
+            showPage(location.hash);
+        });
+    </script>
+</body>
+</html>
